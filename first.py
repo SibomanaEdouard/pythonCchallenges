@@ -1,43 +1,51 @@
-# def can_place_balls(balls, positions, min_dist):
-#     count = 1  # First ball placed at the first position
-#     last_position = positions[0]
+from typing import List, Tuple
 
-#     for i in range(1, len(positions)):
-#         if positions[i] - last_position >= min_dist:
-#             count += 1
-#             last_position = positions[i]
-#             if count == balls:
-#                 return True
-#     return False
+def max_spacing(n: int, m: int, intervals: List[Tuple[int, int]]) -> int:
+    intervals.sort()
 
-# def find_largest_min_dist(balls, positions):
-#     positions.sort()
-#     low = 1
-#     high = positions[-1] - positions[0]
-#     result = 0
+    def count_trees(distance: int) -> int:
+        count = 0
+        last_pos = float('-inf')
+        for start, end in intervals:
+            pos = max(start, last_pos + distance)
+            while pos <= end:
+                count += 1
+                last_pos = pos
+                pos += distance
+        return count
 
-#     while low <= high:
-#         mid = (low + high) // 2
-#         print(f"Trying distance: {mid}")
+    left, right = 0, intervals[-1][1] - intervals[0][0]
+    while left < right:
+        mid = left + (right - left + 1) // 2
+        if count_trees(mid) >= n:
+            left = mid
+        else:
+            right = mid - 1
 
-#         if can_place_balls(balls, positions, mid):
-#             result = mid
-#             low = mid + 1
-#         else:
-#             high = mid - 1
+    return left
 
-#     return result
+# Test cases
+def run_tests():
+    # Test case 1
+    n, m = 2, 2
+    intervals = [(0, 1000000000000000000), (1000000000000000002, 2000000000000000000)]
+    assert max_spacing(n, m, intervals) == 1000000000000000001
 
-# def main():
-#     test_cases = [
-#         {"balls": 2, "positions": [1, 1000000000000000000], "expected": 999999999999999999},
-#         {"balls": 2, "positions": [2, 2], "expected": 0},
-#         {"balls": 2, "positions": [1, 3, 4], "expected": 3}
-#     ]
+    # Test case 2
+    n, m = 4, 3
+    intervals = [(0, 4), (6, 7), (11, 14)]
+    assert max_spacing(n, m, intervals) == 3
 
-#     for i, test_case in enumerate(test_cases):
-#         result = find_largest_min_dist(test_case["balls"], test_case["positions"])
-#         print(f"Test case {i + 1}: Expected {test_case['expected']}, Got {result}")
+    # Test case 3
+    n, m = 5, 2
+    intervals = [(0, 4), (10, 14)]
+    assert max_spacing(n, m, intervals) == 2
 
-# if __name__ == "__main__":
-#     main()
+    # Test case 4
+    n, m = 100000, 100000
+    intervals = [(i * 10, i * 10 + 8) for i in range(100000)]
+    assert max_spacing(n, m, intervals) == 1
+
+    print("All test cases passed!")
+
+run_tests()
